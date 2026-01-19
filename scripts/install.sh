@@ -12,15 +12,26 @@
 set -e  # Exit on error
 
 # ============================================================================
-# CONFIGURATION VARIABLES
+# LOAD CONFIGURATION FROM .env FILE
 # ============================================================================
-# EDIT THESE VARIABLES BEFORE RUNNING
 
-DOMAIN="benefitsmart.xyz"
-HOSTNAME="mail.benefitsmart.xyz"
-EMAIL_USER="admin"
-EMAIL_PASSWORD="changeme123"
-ADMIN_EMAIL="admin@benefitsmart.xyz"
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Load .env file if it exists
+if [ -f "$PROJECT_DIR/.env" ]; then
+    log_info "Loading configuration from .env file..."
+    source "$PROJECT_DIR/.env"
+else
+    # Use default hardcoded values if .env doesn't exist
+    DOMAIN="benefitsmart.xyz"
+    HOSTNAME="mail.benefitsmart.xyz"
+    EMAIL_USER="admin"
+    EMAIL_PASSWORD="Kingsley419."
+    ADMIN_EMAIL="admin@benefitsmart.xyz"
+    log_warn ".env file not found, using default values"
+fi
 
 # ============================================================================
 # COLOR OUTPUT
@@ -473,6 +484,23 @@ echo "DNS Setup:        docs/DNS_SETUP.md"
 echo "Troubleshooting:  docs/SSL_TROUBLESHOOTING.md"
 echo ""
 log_info "Installation logs saved to: /var/log/mail.log"
+echo ""
+
+echo "=============================================================================="
+log_info "🎯 QUICK ACCESS TO YOUR CONFIGURATION"
+echo "=============================================================================="
+echo ""
+log_success "To view your complete SMTP configuration anytime, run:"
+echo ""
+echo "    sudo bash scripts/show-config.sh"
+echo ""
+echo "This will display:"
+echo "  • SMTP credentials (username & password)"
+echo "  • All DNS records"
+echo "  • Connection settings"
+echo "  • Verification commands"
+echo ""
+log_info "Configuration file location: $PROJECT_DIR/.env"
 echo ""
 echo "=============================================================================="
 echo ""

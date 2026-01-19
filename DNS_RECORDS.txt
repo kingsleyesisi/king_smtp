@@ -1,0 +1,99 @@
+==============================================================================
+DNS RECORDS FOR CLOUDFLARE - benefitsmart.xyz
+==============================================================================
+Server IP: 3.215.252.135 (AWS Elastic IP)
+Hostname:  mail.benefitsmart.xyz
+Domain:    benefitsmart.xyz
+
+Copy these records to your Cloudflare DNS settings:
+
+==============================================================================
+1️⃣  A Record (Mail Server Address)
+==============================================================================
+Type:     A
+Name:     mail.benefitsmart.xyz
+IPv4:     3.215.252.135
+TTL:      Auto (or 300)
+Proxy:    DNS only (turn OFF orange cloud)
+
+==============================================================================
+2️⃣  MX Record (Mail Exchanger)
+==============================================================================
+Type:     MX
+Name:     @  (or benefitsmart.xyz)
+Mail:     mail.benefitsmart.xyz
+Priority: 10
+TTL:      Auto (or 300)
+
+==============================================================================
+3️⃣  SPF Record (Sender Policy Framework)
+==============================================================================
+Type:     TXT
+Name:     @  (or benefitsmart.xyz)
+Content:  v=spf1 mx ip4:3.215.252.135 ~all
+TTL:      Auto (or 300)
+
+==============================================================================
+4️⃣  DKIM Record (DomainKeys Identified Mail)
+==============================================================================
+Type:     TXT
+Name:     default._domainkey
+Content:  [WILL BE GENERATED AFTER INSTALLATION]
+TTL:      Auto (or 300)
+
+NOTE: Run "sudo bash scripts/show-config.sh" after installation to get 
+      the complete DKIM key value to paste here.
+
+==============================================================================
+5️⃣  DMARC Record (Domain-based Message Authentication)
+==============================================================================
+Type:     TXT
+Name:     _dmarc
+Content:  v=DMARC1; p=quarantine; rua=mailto:admin@benefitsmart.xyz
+TTL:      Auto (or 300)
+
+==============================================================================
+6️⃣  PTR Record (Reverse DNS) - AWS EC2 Console
+==============================================================================
+⚠️  Configure this in AWS, NOT Cloudflare:
+1. Go to EC2 Console → Elastic IPs
+2. Select: 3.215.252.135
+3. Actions → Update reverse DNS
+4. Enter: mail.benefitsmart.xyz
+
+==============================================================================
+SMTP CREDENTIALS
+==============================================================================
+Email:     admin@benefitsmart.xyz
+Password:  Kingsley419.
+Host:      mail.benefitsmart.xyz
+Port:      587
+Encryption: STARTTLS
+
+==============================================================================
+VERIFICATION COMMANDS (Run after DNS propagation - wait 5-60 mins)
+==============================================================================
+
+# Check A Record
+dig mail.benefitsmart.xyz +short
+# Should return: 3.215.252.135
+
+# Check MX Record
+dig benefitsmart.xyz MX +short
+# Should return: 10 mail.benefitsmart.xyz.
+
+# Check SPF Record
+dig benefitsmart.xyz TXT +short | grep spf
+# Should return: "v=spf1 mx ip4:3.215.252.135 ~all"
+
+# Check DKIM Record
+dig default._domainkey.benefitsmart.xyz TXT +short
+
+# Check DMARC Record
+dig _dmarc.benefitsmart.xyz TXT +short
+
+# Check PTR Record
+dig -x 3.215.252.135 +short
+# Should return: mail.benefitsmart.xyz.
+
+==============================================================================
