@@ -1,0 +1,18 @@
+# OpenDKIM TrustedHosts
+# List of hosts/networks that are trusted to send mail
+# Emails from these hosts will be signed with DKIM
+
+# Localhost
+127.0.0.1
+::1
+localhost
+
+# Your domain
+yourdomain.com
+mail.yourdomain.com
+
+# Your server's IP address (replace with your actual server IP)
+# Example: 203.0.113.10
+
+# Local network (if you have one)
+# Example: 192.168.1.0/24

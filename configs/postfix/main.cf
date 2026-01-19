@@ -1,0 +1,227 @@
+# Postfix main.cf - Main configuration file
+# This file controls how Postfix processes and delivers email
+
+# ============================================================================
+# BASIC SETTINGS
+# ============================================================================
+
+# Compatibility level - helps with upgrades
+compatibility_level = 3.6
+
+# Hostname of this mail server (MUST match your server's FQDN)
+# Example: mail.yourdomain.com
+myhostname = mail.yourdomain.com
+
+# Domain name for outgoing mail
+# Example: yourdomain.com
+mydomain = yourdomain.com
+
+# Origin domain for locally posted mail
+myorigin = $mydomain
+
+# Network interfaces to listen on
+# all = listen on all network interfaces
+inet_interfaces = all
+
+# IP protocols to use (ipv4 only, or all for both ipv4 and ipv6)
+inet_protocols = ipv4
+
+# ============================================================================
+# DESTINATION SETTINGS
+# ============================================================================
+
+# Domains this server accepts mail for
+# $myhostname = mail.yourdomain.com
+# $mydomain = yourdomain.com
+# localhost = localhost
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+# Networks allowed to relay through this server
+# Only localhost can relay by default (secure)
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+
+# ============================================================================
+# SMTP AUTHENTICATION (SASL)
+# ============================================================================
+
+# Enable SMTP authentication for clients
+smtpd_sasl_auth_enable = yes
+
+# SASL implementation to use (Dovecot or Cyrus)
+# We use Dovecot's SASL for simplicity
+smtpd_sasl_type = dovecot
+
+# Path to Dovecot's authentication socket
+smtpd_sasl_path = private/auth
+
+# Security options for SASL
+smtpd_sasl_security_options = noanonymous
+
+# Allow broken SASL clients (Outlook, etc)
+broken_sasl_auth_clients = yes
+
+# ============================================================================
+# TLS/SSL SETTINGS - Let's Encrypt Certificates
+# ============================================================================
+
+# Enable TLS for receiving mail (STARTTLS)
+smtpd_tls_security_level = may
+
+# TLS certificate and key paths (Let's Encrypt)
+smtpd_tls_cert_file = /etc/letsencrypt/live/mail.yourdomain.com/fullchain.pem
+smtpd_tls_key_file = /etc/letsencrypt/live/mail.yourdomain.com/privkey.pem
+
+# Use modern TLS protocols only (disable SSLv2, SSLv3, TLSv1, TLSv1.1)
+smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+
+# Strong cipher suites only
+smtpd_tls_mandatory_ciphers = high
+smtpd_tls_ciphers = high
+
+# TLS session cache for performance
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+
+# Log TLS connection info
+smtpd_tls_loglevel = 1
+
+# Enable TLS for sending mail (outgoing)
+smtp_tls_security_level = may
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+smtp_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtp_tls_ciphers = high
+
+# ============================================================================
+# SMTP RESTRICTIONS - Security and Anti-Spam
+# ============================================================================
+
+# Restrictions for HELO/EHLO command
+smtpd_helo_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_invalid_helo_hostname,
+    reject_non_fqdn_helo_hostname
+
+# Restrictions for MAIL FROM command
+smtpd_sender_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_non_fqdn_sender,
+    reject_unknown_sender_domain
+
+# Restrictions for RCPT TO command (who can receive mail)
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_non_fqdn_recipient,
+    reject_unknown_recipient_domain,
+    reject_unauth_destination
+
+# Restrictions on client connections
+smtpd_client_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated
+
+# ============================================================================
+# MESSAGE SIZE AND DELIVERY SETTINGS
+# ============================================================================
+
+# Maximum size of email message (25MB)
+message_size_limit = 26214400
+
+# Maximum size of mailbox (500MB)
+mailbox_size_limit = 524288000
+
+# ============================================================================
+# DKIM SIGNING - OpenDKIM Integration
+# ============================================================================
+
+# Milter (mail filter) configuration for DKIM
+# OpenDKIM signs outgoing emails with DKIM signature
+
+# Milter protocol version
+milter_protocol = 6
+
+# Default action if milter fails
+milter_default_action = accept
+
+# OpenDKIM milter socket
+smtpd_milters = inet:127.0.0.1:8891
+non_smtpd_milters = inet:127.0.0.1:8891
+
+# ============================================================================
+# VIRTUAL ALIAS MAPPING (Optional)
+# ============================================================================
+
+# Enable virtual alias mapping
+# This allows you to create email aliases
+# Example: info@yourdomain.com -> youruser@yourdomain.com
+virtual_alias_maps = hash:/etc/postfix/virtual
+
+# ============================================================================
+# OTHER SETTINGS
+# ============================================================================
+
+# Local recipient maps
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+
+# Directory for mail queue
+queue_directory = /var/spool/postfix
+
+# Directory for Postfix commands
+command_directory = /usr/sbin
+
+# Directory for Postfix daemons
+daemon_directory = /usr/lib/postfix/sbin
+
+# Directory for Postfix data
+data_directory = /var/lib/postfix
+
+# User that owns the queue and most Postfix processes
+mail_owner = postfix
+
+# Default domain for unqualified addresses
+mydomain = yourdomain.com
+
+# Disable backwards compatibility for chroot
+default_privs = nobody
+
+# Debugging (set to no in production)
+debug_peer_level = 2
+debugger_command =
+    PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+    ddd $daemon_directory/$process_name $process_id & sleep 5
+
+# README location
+readme_directory = no
+
+# HTML directory
+html_directory = no
+
+# Sendmail compatibility
+sendmail_path = /usr/sbin/sendmail
+
+# Newaliases command
+newaliases_path = /usr/bin/newaliases
+
+# Mailq command
+mailq_path = /usr/bin/mailq
+
+# Setgid group
+setgid_group = postdrop
+
+# ============================================================================
+# NOTES AND DOCUMENTATION
+# ============================================================================
+
+# IMPORTANT: After editing this file, run:
+#   sudo postfix reload
+#
+# To verify configuration:
+#   sudo postfix check
+#
+# To test configuration:
+#   sudo postconf -n
+#
+# Replace "yourdomain.com" with your actual domain throughout this file

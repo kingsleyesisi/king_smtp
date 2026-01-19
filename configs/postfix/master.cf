@@ -1,0 +1,160 @@
+# Postfix master.cf - Service configuration file
+# This file defines the services Postfix runs and how they operate
+#
+# Format: service type  private unpriv  chroot  wakeup  maxproc command
+#
+# service:  The name of the service
+# type:     The service type (inet, unix, fifo, pass)
+# private:  Whether the service is private to Postfix (y/n)
+# unpriv:   Whether to run with unprivileged user (y/n)
+# chroot:   Whether to run chrooted (y/n)
+# wakeup:   Wakeup time in seconds (or - for no wakeup)
+# maxproc:  Maximum number of processes (or - for default)
+# command:  The command to run
+
+# ============================================================================
+# SMTP SERVICE - Port 25 (Standard SMTP,ReceiveOnly)
+# ============================================================================
+# This is the standard SMTP port for receiving mail from other mail servers
+# It should NOT be used for sending mail from email clients
+#
+smtp      inet  n       -       y       -       -       smtpd
+#  -o content_filter=spamassassin
+
+# ============================================================================
+# SUBMISSION SERVICE - Port 587 (Authenticated SMTP for Clients)
+# ============================================================================
+# This is the preferred port for email clients to submit mail
+# Requires authentication (SASL) and uses TLS encryption
+#
+# Email clients (Outlook, Thunderbird, etc.) should connect here
+# This is what you'll use for sending email
+#
+submission inet n       -       y       -       -       smtpd
+  # Enforce TLS encryption (mandatory)
+  -o syslog_name=postfix/submission
+  # Allow SASL authentication
+  -o smtpd_tls_security_level=encrypt
+  # Require authentication before sending
+  -o smtpd_sasl_auth_enable=yes
+  # Allow authenticated clients to send to any destination
+  -o smtpd_reject_unlisted_recipient=no
+  # Relax some restrictions for authenticated clients
+  -o smtpd_recipient_restrictions=
+  -o smtpd_relay_restrictions=permit_sasl_authenticated,reject
+  # Allow authenticated clients to send from any address
+  -o milter_macro_daemon_name=ORIGINATING
+  # Override client restrictions
+  -o smtpd_client_restrictions=
+  # Override helo restrictions  
+  -o smtpd_helo_restrictions=
+  # Override sender restrictions
+  -o smtpd_sender_restrictions=
+
+# ============================================================================
+# SMTPS SERVICE - Port 465 (Legacy Encrypted SMTP)
+# ============================================================================
+# This is the legacy port for SMTP over SSL (SMTPS)
+# Some older email clients may require this
+# Modern clients should use port 587 (submission) instead
+#
+# Uncomment the lines below if you need to support legacy clients
+#
+#smtps     inet  n       -       y       -       -       smtpd
+#  -o syslog_name=postfix/smtps
+#  -o smtpd_tls_wrappermode=yes
+#  -o smtpd_sasl_auth_enable=yes
+#  -o smtpd_reject_unlisted_recipient=no
+#  -o smtpd_recipient_restrictions=
+#  -o smtpd_relay_restrictions=permit_sasl_authenticated,reject
+#  -o milter_macro_daemon_name=ORIGINATING
+
+# ============================================================================
+# INTERNAL POSTFIX SERVICES
+# ============================================================================
+# These are internal services used by Postfix itself
+# You should not need to modify these
+
+pickup    unix  n       -       y       60      1       pickup
+cleanup   unix  n       -       y       -       0       cleanup
+qmgr      unix  n       -       n       300     1       qmgr
+tlsmgr    unix  -       -       y       1000?   1       tlsmgr
+rewrite   unix  -       -       y       -       -       trivial-rewrite
+bounce    unix  -       -       y       -       0       bounce
+defer     unix  -       -       y       -       0       bounce
+trace     unix  -       -       y       -       0       bounce
+verify    unix  -       -       y       -       1       verify
+flush     unix  n       -       y       1000?   0       flush
+proxymap  unix  -       -       n       -       -       proxymap
+proxywrite unix -       -       n       -       1       proxymap
+smtp      unix  -       -       y       -       -       smtp
+relay     unix  -       -       y       -       -       smtp
+showq     unix  n       -       y       -       -       showq
+error     unix  -       -       y       -       -       error
+retry     unix  -       -       y       -       -       error
+discard   unix  -       -       y       -       -       discard
+local     unix  -       n       n       -       -       local
+virtual   unix  -       n       n       -       -       virtual
+lmtp      unix  -       -       y       -       -       lmtp
+anvil     unix  -       -       y       -       1       anvil
+scache    unix  -       -       y       -       1       scache
+postlog   unix-dgram n  -       n       -       1       postlogd
+
+# ============================================================================
+# MAILDROP SERVICE (Local Mail Delivery)
+# ============================================================================
+# Used for local mail delivery
+#
+maildrop  unix  -       n       n       -       -       pipe
+  flags=DRXhu user=vmail argv=/usr/bin/maildrop -d ${recipient}
+
+# ============================================================================
+# DOVECOT SERVICE (SASL Authentication)
+# ============================================================================
+# Dovecot provides SASL authentication for Postfix
+# This allows email clients to authenticate when sending mail
+#
+# The socket path must match the setting in main.cf:
+#   smtpd_sasl_path = private/auth
+#
+dovecot   unix  -       n       n       -       -       pipe
+  flags=DRXhu user=vmail:vmail argv=/usr/lib/dovecot/dovecot-lda -f ${sender} -d ${recipient}
+
+# ============================================================================
+# OLD CYRUS SERVICE (Deprecated)
+# ============================================================================
+# Older Postfix versions used Cyrus SASL
+# We use Dovecot SASL instead (see above)
+#
+#old-cyrus unix  -       n       n       -       -       pipe
+#  flags=R user=cyrus argv=/usr/sbin/cyrdeliver -e -m ${extension} ${user}
+
+# ============================================================================
+# CONTENT FILTERS (Optional)
+# ============================================================================
+# SpamAssassin filter (uncomment to enable)
+#
+#spamassassin unix -     n       n       -       -       pipe
+#  user=spamd argv=/usr/bin/spamc -f -e
+#  /usr/sbin/sendmail -oi -f ${sender} ${recipient}
+
+# ============================================================================
+# NOTES AND DOCUMENTATION
+# ============================================================================
+#
+# IMPORTANT: After editing this file, run:
+#   sudo postfix reload
+#
+# To verify configuration:
+#   sudo postfix check
+#
+# KEY PORTS:
+#   Port 25  (smtp)       - Receiving mail from other servers (no auth required)
+#   Port 587 (submission) - Sending mail from email clients (auth required, TLS)
+#   Port 465 (smtps)      - Legacy encrypted SMTP (optional)
+#
+# FOR EMAIL CLIENTS:
+#   Use port 587 with STARTTLS and authentication
+#   Server: mail.yourdomain.com
+#   Security: STARTTLS
+#   Authentication: Yes (your email and password)
