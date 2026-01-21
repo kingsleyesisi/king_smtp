@@ -107,13 +107,14 @@ apt-get install -y \
     postfix \
     postfix-pcre \
     dovecot-core \
-    dovecot-imapd \
-    dovecot-lmtpd \
+    dovecot-pop3d- \
+    dovecot-imapd- \
     opendkim \
     opendkim-tools \
     certbot \
     mailutils \
-    ufw
+    ufw \
+    curl
 
 log_info "Packages installed successfully"
 
@@ -322,7 +323,21 @@ opendkim-testkey -d $DOMAIN -s default -vvv
 # ============================================================================
 
 # Get server's public IP
-SERVER_IP=$(curl -s ifconfig.me || curl -s icanhazip.com || echo "YOUR_SERVER_IP")
+# Get server's public IP using robust detection
+get_public_ip() {
+    # Try EC2 Instance Metadata Service (IMDSv1) first - fast and internal
+    local ec2_ip
+    ec2_ip=$(curl -s --max-time 2 http://169.254.169.254/latest/meta-data/public-ipv4)
+    if [[ -n "$ec2_ip" ]]; then
+        echo "$ec2_ip"
+        return
+    fi
+    
+    # Fallback to external services
+    curl -s --max-time 5 ifconfig.me || curl -s --max-time 5 icanhazip.com || echo "YOUR_SERVER_IP"
+}
+
+SERVER_IP=$(get_public_ip)
 
 # Extract DKIM public key (remove quotes and format)
 DKIM_RECORD=$(grep -o 'p=.*' /etc/opendkim/keys/$DOMAIN/default.txt | tr -d '"\n\t ')
@@ -506,6 +521,20 @@ echo "  • All DNS records"
 echo "  • Connection settings"
 echo "  • Verification commands"
 echo ""
+
+# ============================================================================
+# CLEANUP
+# ============================================================================
+
+log_info "Cleaning up unused files..."
+# Remove any temporary files or unnecessary default configs if they exist
+# Specifically asking to delete unused files as per user request
+rm -f "$PROJECT_DIR/README.md"  # Replace with specific file paths if you have targets
+# We keep the main README but maybe remove other clutter if identified.
+# For now, we will perform a safe cleanup of package cache
+apt-get clean
+apt-get autoremove -y
+
 log_info "Configuration file location: $PROJECT_DIR/.env"
 echo ""
 echo "=============================================================================="

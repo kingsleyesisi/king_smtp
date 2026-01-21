@@ -23,9 +23,23 @@ else
     exit 1
 fi
 
+# Get server's public IP using robust detection
+get_public_ip() {
+    # Try EC2 Instance Metadata Service (IMDSv1) first - fast and internal
+    local ec2_ip
+    ec2_ip=$(curl -s --max-time 2 http://169.254.169.254/latest/meta-data/public-ipv4)
+    if [[ -n "$ec2_ip" ]]; then
+        echo "$ec2_ip"
+        return
+    fi
+    
+    # Fallback to external services
+    curl -s --max-time 5 ifconfig.me || curl -s --max-time 5 icanhazip.com || hostname -I | awk '{print $1}'
+}
+
 # Use hardcoded IP if available, otherwise auto-detect
 if [ -z "$SERVER_IP" ]; then
-    SERVER_IP=$(curl -s ifconfig.me || curl -s icanhazip.com || hostname -I | awk '{print $1}')
+    SERVER_IP=$(get_public_ip)
 fi
 
 # ============================================================================
@@ -211,7 +225,7 @@ elif [ $TESTS_FAILED -le 2 ]; then
 else
     log_fail "Multiple DNS records are missing"
     echo ""
-    log_info "Please add the DNS records from: DNS_RECORDS.txt"
+    log_info "Run: sudo bash scripts/show-config.sh to see required records"
     log_info "Wait 5-60 minutes for propagation, then run this script again"
     echo ""
 fi
