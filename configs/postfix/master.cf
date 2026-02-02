@@ -155,6 +155,6 @@ dovecot   unix  -       n       n       -       -       pipe
 #
 # FOR EMAIL CLIENTS:
 #   Use port 587 with STARTTLS and authentication
-#   Server: mail.yourdomain.com
+#   Server: mail.benefitsmart.xyz
 #   Security: STARTTLS
 #   Authentication: Yes (your email and password)

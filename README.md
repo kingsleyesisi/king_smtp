@@ -1,6 +1,6 @@
 # Kings SMTP Relay
 
-A simple, send-only SMTP relay setup.
+A simple, send-only SMTP relay setup for `mail.benefitsmart.xyz`.
 
 ## Quick Start
 
@@ -8,26 +8,39 @@ A simple, send-only SMTP relay setup.
    ```bash
    sudo bash setup.sh
    ```
-   This will install Postfix, configure it for send-only (SASL auth enabled, no IMAP/POP3), and detect your public IP.
+   This installs Postfix, configures SASL auth, and generates DKIM keys.
 
-2. **DNS Configuration**
-   After setup, view the DNS records you need to add to Cloudflare:
+2. **Get DNS Records** (Easy!)
    ```bash
-   sudo bash scripts/show-config.sh
+   bash get-dns.sh
    ```
+   This generates `cloudflare_dns.txt` with all records ready to copy.
 
-3. **Verify**
-   Once you've added the DNS records, verify propagation:
+3. **Verify DNS**
+   After adding DNS records, wait 5-60 minutes then verify:
    ```bash
    sudo bash scripts/verify-dns.sh
    ```
 
-4. **Test**
-   Send a test email:
+4. **Test Email**
    ```bash
    sudo bash scripts/test-email.sh
    ```
 
 ## Configuration
 
-The configuration is stored in `.env`. The setup script creates this from defaults if it doesn't exist.
+| Setting | Value |
+|---------|-------|
+| Server IP | `3.215.252.135` |
+| Hostname | `mail.benefitsmart.xyz` |
+| SMTP Port | `587` (STARTTLS) |
+| Username | `admin@benefitsmart.xyz` |
+
+Configuration is stored in `.env`. Run `bash scripts/show-config.sh` to view all settings.
+
+## Documentation
+
+- [AWS Deployment](docs/AWS_DEPLOYMENT.md)
+- [DNS Setup Guide](docs/DNS_SETUP.md)
+- [SSL Troubleshooting](docs/SSL_TROUBLESHOOTING.md)
+

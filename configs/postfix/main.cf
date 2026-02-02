@@ -9,12 +9,12 @@
 compatibility_level = 3.6
 
 # Hostname of this mail server (MUST match your server's FQDN)
-# Example: mail.yourdomain.com
-myhostname = mail.yourdomain.com
+# Example: mail.benefitsmart.xyz
+myhostname = mail.benefitsmart.xyz
 
 # Domain name for outgoing mail
 # Example: yourdomain.com
-mydomain = yourdomain.com
+mydomain = benefitsmart.xyz
 
 # Origin domain for locally posted mail
 myorigin = $mydomain
@@ -31,7 +31,7 @@ inet_protocols = ipv4
 # ============================================================================
 
 # Domains this server accepts mail for
-# $myhostname = mail.yourdomain.com
+# $myhostname = mail.benefitsmart.xyz
 # $mydomain = yourdomain.com
 # localhost = localhost
 mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
@@ -68,8 +68,8 @@ broken_sasl_auth_clients = yes
 smtpd_tls_security_level = may
 
 # TLS certificate and key paths (Let's Encrypt)
-smtpd_tls_cert_file = /etc/letsencrypt/live/mail.yourdomain.com/fullchain.pem
-smtpd_tls_key_file = /etc/letsencrypt/live/mail.yourdomain.com/privkey.pem
+smtpd_tls_cert_file = /etc/letsencrypt/live/mail.benefitsmart.xyz/fullchain.pem
+smtpd_tls_key_file = /etc/letsencrypt/live/mail.benefitsmart.xyz/privkey.pem
 
 # Use modern TLS protocols only (disable SSLv2, SSLv3, TLSv1, TLSv1.1)
 smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
@@ -182,7 +182,7 @@ data_directory = /var/lib/postfix
 mail_owner = postfix
 
 # Default domain for unqualified addresses
-mydomain = yourdomain.com
+# Note: mydomain is already set at the top of this file
 
 # Disable backwards compatibility for chroot
 default_privs = nobody

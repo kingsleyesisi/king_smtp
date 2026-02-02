@@ -46,7 +46,7 @@ if systemctl is-active --quiet nginx; then
 fi
 
 # Get certificate
-certbot certonly --standalone --non-interactive -d mail.yourdomain.com
+certbot certonly --standalone --non-interactive -d mail.benefitsmart.xyz
 
 # Restart web servers if they were running
 if [ "$APACHE_WAS_RUNNING" = true ]; then
@@ -67,12 +67,12 @@ If you need to run certbot manually:
 ```bash
 # For Apache
 sudo systemctl stop apache2
-sudo certbot certonly --standalone -d mail.yourdomain.com
+sudo certbot certonly --standalone -d mail.benefitsmart.xyz
 sudo systemctl start apache2
 
 # For Nginx
 sudo systemctl stop nginx
-sudo certbot certonly --standalone -d mail.yourdomain.com
+sudo certbot certonly --standalone -d mail.benefitsmart.xyz
 sudo systemctl start nginx
 ```
 
@@ -80,28 +80,28 @@ sudo systemctl start nginx
 
 ```bash
 # For Apache
-sudo certbot certonly --webroot -w /var/www/html -d mail.yourdomain.com
+sudo certbot certonly --webroot -w /var/www/html -d mail.benefitsmart.xyz
 
 # For Nginx
-sudo certbot certonly --webroot -w /usr/share/nginx/html -d mail.yourdomain.com
+sudo certbot certonly --webroot -w /usr/share/nginx/html -d mail.benefitsmart.xyz
 ```
 
 ### Option 3: Use DNS Challenge (No Port 80 Needed)
 
 ```bash
-sudo certbot certonly --manual --preferred-challenges dns -d mail.yourdomain.com
+sudo certbot certonly --manual --preferred-challenges dns -d mail.benefitsmart.xyz
 ```
 
 You'll be prompted to add a TXT record to your DNS:
 
 ```
-_acme-challenge.mail.yourdomain.com.  300  IN  TXT  "random-verification-string"
+_acme-challenge.mail.benefitsmart.xyz.  300  IN  TXT  "random-verification-string"
 ```
 
 **Steps**:
 1. Add the TXT record to your DNS
 2. Wait 2-5 minutes for propagation
-3. Verify: `dig _acme-challenge.mail.yourdomain.com TXT +short`
+3. Verify: `dig _acme-challenge.mail.benefitsmart.xyz TXT +short`
 4. Press Enter in certbot to continue
 5. Certificate will be issued
 
@@ -135,7 +135,7 @@ sudo netstat -tuln | grep :80
 
 **Symptom**:
 ```
-Detail: DNS problem: NXDOMAIN looking up A for mail.yourdomain.com
+Detail: DNS problem: NXDOMAIN looking up A for mail.benefitsmart.xyz
 ```
 
 **Cause**: DNS A record not set or not propagated
@@ -143,13 +143,13 @@ Detail: DNS problem: NXDOMAIN looking up A for mail.yourdomain.com
 **Solution**:
 ```bash
 # Check if A record exists
-dig mail.yourdomain.com +short
+dig mail.benefitsmart.xyz +short
 
 # If empty, add A record to your DNS:
-# mail.yourdomain.com.  300  IN  A  YOUR_SERVER_IP
+# mail.benefitsmart.xyz.  300  IN  A  YOUR_SERVER_IP
 
 # Wait 5-15 minutes, then check again
-watch -n 10 dig mail.yourdomain.com +short
+watch -n 10 dig mail.benefitsmart.xyz +short
 ```
 
 ### Issue: Rate Limit Exceeded
@@ -166,7 +166,7 @@ Error: too many certificates already issued for exact set of domains
 1. **Wait 7 days** for the rate limit to reset
 2. **Use staging server** for testing:
    ```bash
-   sudo certbot certonly --standalone --staging -d mail.yourdomain.com
+   sudo certbot certonly --standalone --staging -d mail.benefitsmart.xyz
    ```
 3. **Delete failed attempts** don't count against limit
 4. **Check your rate limit status**: https://crt.sh/?q=yourdomain.com
@@ -189,20 +189,20 @@ Certificate obtained but Postfix still shows SSL errors
    
    Output shows:
    ```
-   Certificate Path: /etc/letsencrypt/live/mail.yourdomain.com/fullchain.pem
-   Private Key Path: /etc/letsencrypt/live/mail.yourdomain.com/privkey.pem
+   Certificate Path: /etc/letsencrypt/live/mail.benefitsmart.xyz/fullchain.pem
+   Private Key Path: /etc/letsencrypt/live/mail.benefitsmart.xyz/privkey.pem
    ```
 
 2. **Configure Postfix** (`/etc/postfix/main.cf`):
    ```conf
-   smtpd_tls_cert_file=/etc/letsencrypt/live/mail.yourdomain.com/fullchain.pem
-   smtpd_tls_key_file=/etc/letsencrypt/live/mail.yourdomain.com/privkey.pem
+   smtpd_tls_cert_file=/etc/letsencrypt/live/mail.benefitsmart.xyz/fullchain.pem
+   smtpd_tls_key_file=/etc/letsencrypt/live/mail.benefitsmart.xyz/privkey.pem
    ```
 
 3. **Configure Dovecot** (`/etc/dovecot/conf.d/10-ssl.conf`):
    ```conf
-   ssl_cert = </etc/letsencrypt/live/mail.yourdomain.com/fullchain.pem
-   ssl_key = </etc/letsencrypt/live/mail.yourdomain.com/privkey.pem
+   ssl_cert = </etc/letsencrypt/live/mail.benefitsmart.xyz/fullchain.pem
+   ssl_key = </etc/letsencrypt/live/mail.benefitsmart.xyz/privkey.pem
    ```
 
 4. **Restart services**:
@@ -255,23 +255,23 @@ sudo certbot certificates
 
 ### Test STARTTLS (Port 587)
 ```bash
-openssl s_client -starttls smtp -connect mail.yourdomain.com:587 -servername mail.yourdomain.com
+openssl s_client -starttls smtp -connect mail.benefitsmart.xyz:587 -servername mail.benefitsmart.xyz
 ```
 
 Look for:
 ```
-subject=CN = mail.yourdomain.com
+subject=CN = mail.benefitsmart.xyz
 issuer=C = US, O = Let's Encrypt, CN = R3
 ```
 
 ### Test SMTPS (Port 465, if enabled)
 ```bash
-openssl s_client -connect mail.yourdomain.com:465 -servername mail.yourdomain.com
+openssl s_client -connect mail.benefitsmart.xyz:465 -servername mail.benefitsmart.xyz
 ```
 
 ### Check Certificate Expiry
 ```bash
-echo | openssl s_client -starttls smtp -connect mail.yourdomain.com:587 2>/dev/null | openssl x509 -noout -dates
+echo | openssl s_client -starttls smtp -connect mail.benefitsmart.xyz:587 2>/dev/null | openssl x509 -noout -dates
 ```
 
 Output:
@@ -291,7 +291,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --register-account -m admin@yourdomain.com --server zerossl
 
 # Get certificate
-~/.acme.sh/acme.sh --issue --standalone -d mail.yourdomain.com
+~/.acme.sh/acme.sh --issue --standalone -d mail.benefitsmart.xyz
 ```
 
 ### 2. Self-Signed Certificate (Testing Only)
@@ -299,13 +299,13 @@ curl https://get.acme.sh | sh
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout /etc/ssl/private/mail-selfsigned.key \
   -out /etc/ssl/certs/mail-selfsigned.crt \
-  -subj "/CN=mail.yourdomain.com"
+  -subj "/CN=mail.benefitsmart.xyz"
 ```
 
 ⚠️ **Warning**: Self-signed certificates will show warnings in email clients
 
 ### 3. Commercial SSL (Namecheap, DigiCert, etc.)
-- Purchase certificate for `mail.yourdomain.com`
+- Purchase certificate for `mail.benefitsmart.xyz`
 - Download certificate and private key
 - Place in `/etc/ssl/`
 - Update Postfix/Dovecot configs
@@ -315,10 +315,10 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 ### 1. Test Before Production
 ```bash
 # Use staging environment for testing
-sudo certbot certonly --standalone --staging -d mail.yourdomain.com
+sudo certbot certonly --standalone --staging -d mail.benefitsmart.xyz
 
 # Once working, get real certificate
-sudo certbot certonly --standalone -d mail.yourdomain.com
+sudo certbot certonly --standalone -d mail.benefitsmart.xyz
 ```
 
 ### 2. Monitor Certificate Expiry
@@ -352,7 +352,7 @@ When SSL fails, run through this checklist:
 
 - [ ] Is port 80 open in firewall? `sudo ufw status`
 - [ ] Is Apache/Nginx stopped? `sudo systemctl status apache2 nginx`
-- [ ] Is DNS A record correct? `dig mail.yourdomain.com +short`
+- [ ] Is DNS A record correct? `dig mail.benefitsmart.xyz +short`
 - [ ] Is DNS propagated? Wait 15-60 minutes
 - [ ] Try DNS challenge instead? `certbot --manual --preferred-challenges dns`
 - [ ] Check certbot logs: `sudo tail -f /var/log/letsencrypt/letsencrypt.log`
@@ -368,7 +368,7 @@ sudo tail -f /var/log/letsencrypt/letsencrypt.log
 
 ### Increase Verbosity
 ```bash
-sudo certbot --verbose certonly --standalone -d mail.yourdomain.com
+sudo certbot --verbose certonly --standalone -d mail.benefitsmart.xyz
 ```
 
 ### Community Support

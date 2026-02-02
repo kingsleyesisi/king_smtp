@@ -51,7 +51,7 @@ AWS Support → Create Case
 ├── Type: Service Limit Increase
 ├── Limit: Email Port 25 Throttle Removal
 ├── Elastic IP: [Your IP]
-├── Reverse DNS: mail.yourdomain.com
+├── Reverse DNS: mail.benefitsmart.xyz
 └── Use Case: Transactional email server
 ```
 
@@ -63,10 +63,10 @@ AWS Support → Create Case
 
 ```dns
 # A Record
-mail.yourdomain.com.    300    IN    A        YOUR_ELASTIC_IP
+mail.benefitsmart.xyz.    300    IN    A        YOUR_ELASTIC_IP
 
 # MX Record
-yourdomain.com.         300    IN    MX       10 mail.yourdomain.com.
+yourdomain.com.         300    IN    MX       10 mail.benefitsmart.xyz.
 
 # SPF Record
 yourdomain.com.         300    IN    TXT      "v=spf1 mx ip4:YOUR_ELASTIC_IP ~all"
@@ -82,13 +82,13 @@ _dmarc.yourdomain.com.  300    IN    TXT      "v=DMARC1; p=quarantine; rua=mailt
 ```
 EC2 → Elastic IPs → Select your IP
 → Actions → Update reverse DNS
-→ Enter: mail.yourdomain.com
+→ Enter: mail.benefitsmart.xyz
 ```
 
 **Verify**:
 ```bash
 dig -x YOUR_ELASTIC_IP +short
-# Should return: mail.yourdomain.com.
+# Should return: mail.benefitsmart.xyz.
 ```
 
 ### 6. SSH and Install (15 minutes)
@@ -118,7 +118,7 @@ nano scripts/install.sh
 **Update these lines**:
 ```bash
 DOMAIN="yourdomain.com"              # Your domain
-HOSTNAME="mail.yourdomain.com"       # Mail hostname
+HOSTNAME="mail.benefitsmart.xyz"       # Mail hostname
 EMAIL_USER="admin"                   # Email username
 EMAIL_PASSWORD="SECURE_PASSWORD_123" # Change this!
 ADMIN_EMAIL="admin@yourdomain.com"   # Your email
@@ -204,7 +204,7 @@ mailq
 
 ### Test SMTP connection:
 ```bash
-telnet mail.yourdomain.com 587
+telnet mail.benefitsmart.xyz 587
 ```
 
 ### View service status:
@@ -300,7 +300,7 @@ After successful deployment:
 
 **✅ Deployment Complete!**
 
-Your SMTP server is now live at: `mail.yourdomain.com`
+Your SMTP server is now live at: `mail.benefitsmart.xyz`
 
 Test it by sending an email:
 ```bash

@@ -26,7 +26,7 @@ Content: 203.0.113.10
 ```
 Type: MX
 Name: @
-Content: mail.yourdomain.com
+Content: mail.benefitsmart.xyz
 Priority: 10
 TTL: Auto
 ```
@@ -36,13 +36,13 @@ TTL: Auto
 ```
 Type: TXT
 Name: @
-Content: v=spf1 mx a:mail.yourdomain.com ~all
+Content: v=spf1 mx a:mail.benefitsmart.xyz ~all
 TTL: Auto
 ```
 
 **Advanced SPF (if using additional mail services):**
 ```
-v=spf1 mx a:mail.yourdomain.com include:_spf.google.com ~all
+v=spf1 mx a:mail.benefitsmart.xyz include:_spf.google.com ~all
 ```
 
 ### 4. DKIM Record
@@ -111,7 +111,7 @@ dig TXT default._domainkey.yourdomain.com +short
 dig TXT _dmarc.yourdomain.com +short
 
 # A Record
-dig A mail.yourdomain.com +short
+dig A mail.benefitsmart.xyz +short
 
 # Reverse DNS (PTR)
 dig -x YOUR_SERVER_IP +short
@@ -125,13 +125,13 @@ dig -x YOUR_SERVER_IP +short
 2. Navigate to: Network & Security → Elastic IPs
 3. Select your IP address
 4. Actions → Update reverse DNS
-5. Enter: `mail.yourdomain.com`
+5. Enter: `mail.benefitsmart.xyz`
 6. Submit request
 
 **Verify:**
 ```bash
 dig -x YOUR_SERVER_IP +short
-# Should return: mail.yourdomain.com.
+# Should return: mail.benefitsmart.xyz.
 ```
 
 ## Common DNS Issues
@@ -163,7 +163,7 @@ dig @1.1.1.1 TXT default._domainkey.yourdomain.com
 
 ### 3. Cloudflare Proxy Issues
 
-**Important:** The A record for `mail.yourdomain.com` must be **DNS only** (grey cloud), not proxied (orange cloud).
+**Important:** The A record for `mail.benefitsmart.xyz` must be **DNS only** (grey cloud), not proxied (orange cloud).
 
 If proxied:
 - SMTP connections will fail

@@ -114,7 +114,8 @@ apt-get install -y \
     certbot \
     mailutils \
     ufw \
-    curl
+    curl \
+    dnsutils
 
 log_info "Packages installed successfully"
 
@@ -174,14 +175,14 @@ log_info "Configuring OpenDKIM..."
 
 # Copy configuration (assumes you have configs/opendkim/ directory)
 if [ -f "../configs/opendkim/opendkim.conf" ]; then
-    cp ../configs/opendkim/opendkim.conf /etc/opendkim.conf
-    cp ../configs/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
+    cp "$PROJECT_DIR/configs/opendkim/opendkim.conf" /etc/opendkim.conf
+    cp "$PROJECT_DIR/configs/opendkim/TrustedHosts" /etc/opendkim/TrustedHosts
     
     # Replace domain placeholders
     sed -i "s/yourdomain.com/$DOMAIN/g" /etc/opendkim.conf
     sed -i "s/yourdomain.com/$DOMAIN/g" /etc/opendkim/TrustedHosts
 else
-    log_warn "OpenDKIM config files not found in ../configs/opendkim/"
+    log_warn "OpenDKIM config files not found in $PROJECT_DIR/configs/opendkim/"
 fi
 
 # Create OpenDKIM directory
@@ -199,15 +200,15 @@ cp /etc/postfix/main.cf /etc/postfix/main.cf.backup
 cp /etc/postfix/master.cf /etc/postfix/master.cf.backup
 
 # Copy configurations (assumes you have configs/postfix/ directory)
-if [ -f "../configs/postfix/main.cf" ]; then
-    cp ../configs/postfix/main.cf /etc/postfix/main.cf
-    cp ../configs/postfix/master.cf /etc/postfix/master.cf
+if [ -f "$PROJECT_DIR/configs/postfix/main.cf" ]; then
+    cp "$PROJECT_DIR/configs/postfix/main.cf" /etc/postfix/main.cf
+    cp "$PROJECT_DIR/configs/postfix/master.cf" /etc/postfix/master.cf
     
     # Replace domain placeholders
     sed -i "s/yourdomain.com/$DOMAIN/g" /etc/postfix/main.cf
-    sed -i "s/mail.yourdomain.com/$HOSTNAME/g" /etc/postfix/main.cf
+    sed -i "s/mail.benefitsmart.xyz/$HOSTNAME/g" /etc/postfix/main.cf
 else
-    log_warn "Postfix config files not found in ../configs/postfix/"
+    log_warn "Postfix config files not found in $PROJECT_DIR/configs/postfix/"
 fi
 
 # Create virtual alias file
@@ -221,9 +222,9 @@ postmap /etc/postfix/virtual
 log_info "Configuring Dovecot..."
 
 # Copy Dovecot configs
-if [ -f "../configs/dovecot/10-auth.conf" ]; then
-    cp ../configs/dovecot/10-auth.conf /etc/dovecot/conf.d/10-auth.conf
-    cp ../configs/dovecot/10-master.conf /etc/dovecot/conf.d/10-master.conf
+if [ -f "$PROJECT_DIR/configs/dovecot/10-auth.conf" ]; then
+    cp "$PROJECT_DIR/configs/dovecot/10-auth.conf" /etc/dovecot/conf.d/10-auth.conf
+    cp "$PROJECT_DIR/configs/dovecot/10-master.conf" /etc/dovecot/conf.d/10-master.conf
 fi
 
 # Create users file with hashed password
@@ -314,9 +315,9 @@ systemctl is-active --quiet postfix && log_info "Postfix is running" || log_erro
 systemctl is-active --quiet opendkim && log_info "OpenDKIM is running" || log_error "OpenDKIM is not running"
 systemctl is-active --quiet dovecot && log_info "Dovecot is running" || log_error "Dovecot is not running"
 
-# Test DKIM key
+# Test DKIM key (allow failure as DNS might not be ready)
 log_info "Testing DKIM key..."
-opendkim-testkey -d $DOMAIN -s default -vvv
+opendkim-testkey -d $DOMAIN -s default -vvv || log_warn "DKIM check failed (likely DNS not propogated yet), continuing..."
 
 # ============================================================================
 # DISPLAY IMPORTANT INFORMATION
@@ -529,7 +530,7 @@ echo ""
 log_info "Cleaning up unused files..."
 # Remove any temporary files or unnecessary default configs if they exist
 # Specifically asking to delete unused files as per user request
-rm -f "$PROJECT_DIR/README.md"  # Replace with specific file paths if you have targets
+# rm -f "$PROJECT_DIR/README.md"  # Kept for reference
 # We keep the main README but maybe remove other clutter if identified.
 # For now, we will perform a safe cleanup of package cache
 apt-get clean

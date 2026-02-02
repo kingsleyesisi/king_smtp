@@ -39,7 +39,7 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "EC2 Instance: mail.yourdomain.com"
+    subgraph "EC2 Instance: mail.benefitsmart.xyz"
         subgraph "Incoming Email"
             SMTP25[Postfix<br/>Port 25<br/>SMTP]
         end
@@ -141,12 +141,12 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "DNS Records Required"
-        A[A Record<br/>mail.yourdomain.com → IP]
-        MX[MX Record<br/>yourdomain.com → mail.yourdomain.com]
+        A[A Record<br/>mail.benefitsmart.xyz → IP]
+        MX[MX Record<br/>yourdomain.com → mail.benefitsmart.xyz]
         SPF[SPF Record<br/>TXT: v=spf1 mx ip4:IP ~all]
         DKIM[DKIM Record<br/>TXT: default._domainkey]
         DMARC[DMARC Record<br/>TXT: _dmarc]
-        PTR[PTR Record<br/>IP → mail.yourdomain.com]
+        PTR[PTR Record<br/>IP → mail.benefitsmart.xyz]
     end
     
     subgraph "Validation Services"
@@ -303,7 +303,7 @@ graph LR
 │   │           └── default.txt      # Public key (add to DNS)
 │   └── letsencrypt/
 │       └── live/
-│           └── mail.yourdomain.com/
+│           └── mail.benefitsmart.xyz/
 │               ├── fullchain.pem    # SSL certificate
 │               └── privkey.pem      # Private key
 └── var/

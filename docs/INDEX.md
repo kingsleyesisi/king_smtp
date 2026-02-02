@@ -352,7 +352,7 @@ See [AWS_DEPLOYMENT.md - Production Checklist](AWS_DEPLOYMENT.md#9-production-ch
 
 Once everything is working:
 
-1. ✅ Your SMTP server is live at `mail.yourdomain.com`
+1. ✅ Your SMTP server is live at `mail.benefitsmart.xyz`
 2. ✅ You can send/receive emails
 3. ✅ Email authentication (SPF, DKIM, DMARC) is working
 4. ✅ SSL/TLS encryption is active

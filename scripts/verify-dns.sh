@@ -8,6 +8,13 @@
 
 set -e
 
+# Check for required dependencies
+if ! command -v dig &> /dev/null; then
+    echo "Error: 'dig' command not found."
+    echo "Please install dnsutils: sudo apt-get install dnsutils -y"
+    exit 1
+fi
+
 # ============================================================================
 # LOAD CONFIGURATION
 # ============================================================================
@@ -83,6 +90,43 @@ echo ""
 
 TESTS_PASSED=0
 TESTS_FAILED=0
+
+# ============================================================================
+# SERVICE VERIFICATION (Ports)
+# ============================================================================
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Test 0: Service Ports (25 & 587)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+check_port() {
+    local port=$1
+    if command -v nc &> /dev/null; then
+        nc -z -w 2 127.0.0.1 $port && return 0 || return 1
+    else
+        timeout 1 bash -c "cat < /dev/null > /dev/tcp/127.0.0.1/$port" 2>/dev/null && return 0 || return 1
+    fi
+}
+
+# Check Port 25 (SMTP)
+if check_port 25; then
+    log_pass "Port 25 (SMTP) is OPEN"
+else
+    log_fail "Port 25 (SMTP) is CLOSED"
+    log_info "Postfix might not be running or is misconfigured."
+    ((TESTS_FAILED++))
+fi
+
+# Check Port 587 (Submission)
+if check_port 587; then
+    log_pass "Port 587 (Submission) is OPEN"
+else
+    log_fail "Port 587 (Submission) is CLOSED"
+    log_info "This port is required for sending mail."
+    log_info "If this is closed, the config files likely failed to copy."
+    ((TESTS_FAILED++))
+fi
+echo ""
 
 # Test 1: A Record
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
